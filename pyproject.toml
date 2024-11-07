@@ -1,0 +1,45 @@
+[project]
+name = "jupyter-output-monitor"
+authors = [
+    {name = "Thomas Robitaille", email = "thomas.robitaille@gmail.com"},
+]
+license = {text = "BSD 3-Clause"}
+description = "Monitor the visual output of Jupyter notebook cells"
+urls = {Homepage = "https://github.com/glue-viz/jupyter-output-monitor"}
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.23",
+    "click",
+    "pillow",
+    "playwright"
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[build-system]
+requires = ["setuptools",
+            "setuptools_scm"]
+build-backend = 'setuptools.build_meta'
+
+[project.scripts]
+jupyter-output-monitor = "jupyter_output_monitor:monitor"
+
+[tool.setuptools]
+zip-safe = false
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.setuptools_scm]
+write_to = "jupyter_output_monitor/_version.py"
+
+[tool.ruff]
+lint.select = [
+  "B",  # flake8-bugbear
+  "I",  # isort
+  "UP",  # pyupgrade
+]
