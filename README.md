@@ -18,7 +18,13 @@ If this is the first time using playwright, you will need to run::
 
     playwright install firefox
 
-## How to use this
+## Installing
+
+To install, check out this repository and:
+
+    pip install -e .
+
+## How this works
 
 The general approach here is to use playwright to open a notebook, and run the
 cells one by one, and the script will then watch for any output cells that have
@@ -99,7 +105,7 @@ One final note is that to avoid any jumping up and down of the notebook during
 execution, the window opened by the script has a very large height so that the
 full notebook fits inside the window without scrolling.
 
-## Instructions
+## How to use
 
 * Assuming you have installed
   [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration),
@@ -110,9 +116,9 @@ full notebook fits inside the window without scrolling.
   you set the border color on any ipywidget layout you want to record.
 * Make sure the notebook you want to profile is the main one opened and that
   you have cleared any output cells.
-* Run the script in this repository, specifying the URL to connect to for Jupyter Lab, e.g.:
+* Run the main command in this package, specifying the URL to connect to for Jupyter Lab, e.g.:
 
-        python monitor_cell_by_cell.py http://localhost:8987
+      jupyter-output-monitor http://localhost:8987
 
 ## Settings
 
