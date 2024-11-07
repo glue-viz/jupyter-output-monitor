@@ -10,7 +10,7 @@ On the machine being used to run the ``monitor_cells.py``:
 * [pillow](https://python-pillow.org/)
 * [playwright](https://pypi.org/project/playwright/)
 
-On the Jupyter Lab server:
+On the Jupyter Lab server, optionally (but recommended):
 
 * [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration)
 
@@ -18,31 +18,49 @@ If this is the first time using playwright, you will need to run::
 
     playwright install firefox
 
-## Approach and Motivation
+## How to use this
 
-The general approach here is to use playwright to open a notebook, and the script
-will then watch for any cells that have a special border. This border is identified
-by having a very specific set of 256 colors which is ``(143, 56, *)``. If a cell
-output contains a frame with a border that has this color, then we start recording
-screenshots for this cells, where the blue color gives the index of the set of
-screenshots. For instance, if ``*`` is 3, the script will save a set of screenshots
-that looks like:
+The general approach here is to use playwright to open a notebook, and run the
+cells one by one, and the script will then watch for any output cells that have
+a special border and take screenshots of them and any changes.
 
-    003-2024-11-06T11:13:05.657891.png
-    003-2024-11-06T11:13:06.468521.png
-    003-2024-11-06T11:13:06.733932.png
-    003-2024-11-06T11:13:06.982627.png
-    003-2024-11-06T11:13:07.238872.png
-    003-2024-11-06T11:13:08.075732.png
-    003-2024-11-06T11:13:08.347225.png
-    003-2024-11-06T11:13:08.591041.png
+This border is identified by having a very specific set of 256 colors which is
+``(143, 56, *)``. If a cell output contains a frame with a border that has this
+color, then we start recording screenshots for this cells, where the blue color
+gives the index of the set of screenshots. For instance, if ``*`` is 3, the
+script will save a set of screenshots that looks like:
+
+    output-003-2024-11-06T11:13:05.657891.png
+    output-003-2024-11-06T11:13:06.468521.png
+    output-003-2024-11-06T11:13:06.733932.png
+    output-003-2024-11-06T11:13:06.982627.png
+    output-003-2024-11-06T11:13:07.238872.png
+    output-003-2024-11-06T11:13:08.075732.png
 
 Screenshots are only saved if the output has changed. By default, the bytes of the
 screenshot have to match the previous one exactly in order to not be saved, though
 we could make it have some amount of tolerance.
 
-On the monitoring side, this is all that happens - screenshots are saved for cells
-with a special frame color, for any change in the output.
+In addition to screenshots, an event log ``event_log.csv`` is written out in csv
+format, and looks like:
+
+    time,event,index,screenshot
+    2024-11-06T23:47:10.156918,execute-input,0,output-2024-11-06T23:46:59.265044/input-000-2024-11-06T23:47:10.156918.png
+    2024-11-06T23:47:10.938298,output-changed,201,output-2024-11-06T23:46:59.265044/output-201-2024-11-06T23:47:10.938298.png
+    2024-11-06T23:47:11.456103,output-changed,201,output-2024-11-06T23:46:59.265044/output-201-2024-11-06T23:47:11.456103.png
+    2024-11-06T23:47:20.848153,execute-input,1,output-2024-11-06T23:46:59.265044/input-001-2024-11-06T23:47:20.848153.png
+    2024-11-06T23:47:22.643143,output-changed,201,output-2024-11-06T23:46:59.265044/output-201-2024-11-06T23:47:22.643143.png
+    2024-11-06T23:47:31.346982,execute-input,2,output-2024-11-06T23:46:59.265044/input-002-2024-11-06T23:47:31.346982.png
+    2024-11-06T23:47:41.713318,execute-input,3,output-2024-11-06T23:46:59.265044/input-003-2024-11-06T23:47:41.713318.png
+    2024-11-06T23:47:42.525010,output-changed,201,output-2024-11-06T23:46:59.265044/output-201-2024-11-06T23:47:42.525010.png
+    2024-11-06T23:47:42.973950,output-changed,201,output-2024-11-06T23:46:59.265044/output-201-2024-11-06T23:47:42.973950.png
+
+This shows when each input was executed, as well as any associated screenshot.
+The ``index`` column gives the index of the input cell in the notebook for the
+``execute-input`` events, though note that this may not always line up with
+Jupyter's numbering, so to avoid any confusion, a matching screenshot of the
+input cell is taken. For ``output-changed`` events, the index is that given by
+the border color as described above.
 
 We now look at how to set the frame color and trigger the recording. In order to
 start recording a cell output, the top level of that cell output has to be an
@@ -59,25 +77,27 @@ and if using jdaviz:
 To stop recording output for a given cell, you can set the border attribute to
 ``''``.
 
-In theory, it is possible to add borders to multiple output cells in the
-notebook, but this will cause severe flickering as playwright needs to scroll to
-each different output in order to take screenshots. Furthermore, even when
-taking screenshots of a single cell, this makes it difficult to type any input
-into the notebook due to the jumping up and down of the notebook. Therefore,
-assuming we are not doing headless tests for now, the easiest approach is
-actually to use the jupyter-collaboration plugin, and to have a main browser
-window open (not with playwright) from which you control the notebook, and then
-connect to the same Jupyter instance using playwright and not to interfere with
-any scrolling or input in that browser.
+## Headless vs non-headless mode
 
-In this case it is still best not to have multiple cells that have a border at
-any one time as this will still cause jumping around and the screenshots do not
-always work properly in this case.
+By default, the script will open up a window and show what it is doing. It will
+also wait until it detects any input cells before proceeding. This then gives
+you the opportunity to enter any required passwords, and open the correct
+notebook. However, note that if Jupyter Lab opens up with a different notebook
+to the one you want by default, it will start executing that one! It's also
+better if the notebook starts off with output cells cleared, otherwise the script
+may start taking screenshots straight away.
 
-Instead, the best approach is likely to have a single cell where the output is
-being measured, but one can still have several benchmarks that change the blue
-component of the border color over time to indicate the index of the benchmark
-being carried out.
+The easiest way to ensure that the correct notebook gets executed and that it
+has had its output cells cleared is to make use of the
+[jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration)
+plugin. With this plugin installed, you can open Jupyter Lab in a regular browser window,
+and set it up so that the correct notebook is open by default and has its cells cleared,
+and you can then launch the monitoring script. In fact, if you do this you can then
+also run the script in headless mode since you know it should be doing the right thing.
+
+One final note is that to avoid any jumping up and down of the notebook during
+execution, the window opened by the script has a very large height so that the
+full notebook fits inside the window without scrolling.
 
 ## Instructions
 
@@ -85,35 +105,28 @@ being carried out.
   [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration),
   start up Jupyter Lab instance on a regular browser and go to the notebook you
   want to profile.
-* Write a block of code you want to benchmark in a cell, and at the start of
-  that cell, set the border color for the output cell you want to take
-  screenshots of. Don't reset the color of the border at the end of the cell
-  otherwise the screenshots will prematurely stop once the Python code in the
-  cell has stopped executing rather than when the UI has finished updating. Once
-  you are happy with the benchmark you have set up, make sure you clear any
-  output cells before continuing (otherwise screenshots will start being taken
-  straight away in the next step).
+* If not already done, write one or more blocks of code you want to benchmark
+  each in a cell. In addition, as early as possible in the notebook, make sure
+  you set the border color on any ipywidget layout you want to record.
+* Make sure the notebook you want to profile is the main one opened and that
+  you have cleared any output cells.
 * Run the script in this repository, specifying the URL to connect to for Jupyter Lab, e.g.:
 
-        python monitor_cells.py http://localhost:8987
+        python monitor_cell_by_cell.py http://localhost:8987
 
-  and navigate to the notebook you want, optionally entering any password etc.
-* In the main browser, execute the cell(s) needed to make the benchmark run. The
-  border color should immediately change and immediately trigger a screenshot,
-  regardless of whether the rest of the UI has had any updates yet
+## Settings
 
-## Results
 
-In addition to screenshots being saved to the output directory, there is a
-``times.csv`` file that lists the output cell index (based on the B part of the
-RGB color, not the Jupyter cell numbering), the ISO time, and the standard
-deviation of the current screenshot in RGB space compared to the last version.
+### Headless
 
-## Wish list (and why some of these aren't trivial)
+To run in headless mode, include ``--headless``
 
-* A utility or context manager to automatically set the border color
-  automatically and then remove it at the end of a block of code. This isn't
-  trivial because in fact we don't want to reset the border color once the
-  Python block has executed, since the UI may continue to update after this.
-* Allow some tolerance between screenshots to not output too many for any changed byte
-* Output a csv file with machine-readable times for each screenshot
+### Time between cell executions
+
+Since the monitoring script has no way of knowing when a cell has finished fully
+executing, including any UI updates which might happen after the Python code has
+finished running, we use a simpler approach - we execute each cell a fixed time
+after the previous one. This is 10s by default but can be customized with
+``--wait-after-execute=20`` for example. You should set this value so that the
+cell that takes the longest to fully execute will be expected to take less than
+this time.
