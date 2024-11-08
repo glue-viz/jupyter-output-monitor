@@ -13,6 +13,7 @@ dependencies = [
     "pillow",
     "playwright",
     "solara[pytest]"
+    "nbformat",
 ]
 dynamic = ["version"]
 

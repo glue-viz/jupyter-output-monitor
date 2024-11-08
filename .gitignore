@@ -5,3 +5,6 @@ dist
 build
 .ipynb_checkpoints
 __pycache__
+output-2*
+jupyter_output_monitor/_version.py
+jupyter_output_monitor/__pycache__/*
