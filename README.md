@@ -9,6 +9,7 @@ On the machine being used to run the ``monitor_cells.py``:
 * [click](https://click.palletsprojects.com/en/stable/)
 * [pillow](https://python-pillow.org/)
 * [playwright](https://pypi.org/project/playwright/)
+* [nbformat](https://pypi.org/project/nbformat/)
 
 On the Jupyter Lab server, optionally (but recommended):
 
@@ -136,3 +137,9 @@ after the previous one. This is 10s by default but can be customized with
 ``--wait-after-execute=20`` for example. You should set this value so that the
 cell that takes the longest to fully execute will be expected to take less than
 this time.
+
+### Notebook copy
+
+To save a copy of the notebook with the profiling results and
+screenshots inserted after the executed code cells,
+include ``--notebook-copy /path/to/notebook.ipynb``.
