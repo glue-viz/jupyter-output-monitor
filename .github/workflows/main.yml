@@ -1,0 +1,24 @@
+name: Automated test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Python 3.12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Set up dependencies
+        run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest
+      - name: Convert notebook to profiling script
+        run: python convert.py imviz-profile.pynb imviz-profile.py
+        working-directory: automated
+      - name: Run profiling script
+        run: pytest imviz-profile.py
+        working-directory: automated
