@@ -14,8 +14,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
       - name: Set up dependencies
-        run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest scipy
+        run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest scipy astropy jdaviz
       - name: Initialize playwright
         run: playwright install
       - name: Convert notebook to profiling script
