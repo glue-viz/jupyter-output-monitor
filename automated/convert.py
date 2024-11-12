@@ -54,7 +54,7 @@ print(f"Extra time waiting for display to update: {time_elapsed:.2f}s")
 @click.argument('output_script')
 def convert(input_notebook, output_script):
 
-    nb = nbformat.read('imviz-profile2.ipynb', as_version=4)
+    nb = nbformat.read(input_notebook, as_version=4)
 
     with open(output_script, 'w') as f:
 
