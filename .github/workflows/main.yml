@@ -17,7 +17,7 @@ jobs:
       - name: Set up dependencies
         run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest
       - name: Convert notebook to profiling script
-        run: python convert.py imviz-profile.pynb imviz-profile.py
+        run: python convert.py imviz-profile.ipynb imviz-profile.py
         working-directory: ./automated
       - name: Run profiling script
         run: pytest imviz-profile.py
