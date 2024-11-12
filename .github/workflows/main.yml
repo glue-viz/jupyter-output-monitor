@@ -16,6 +16,8 @@ jobs:
           python-version: '3.12'
       - name: Set up dependencies
         run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest
+      - name: Initialize playwright
+        run: playwright install
       - name: Convert notebook to profiling script
         run: python convert.py imviz-profile.ipynb imviz-profile.py
         working-directory: ./automated
