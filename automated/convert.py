@@ -30,7 +30,7 @@ def watch_screenshot(widget):
         if screenshot_bytes != last_screenshot:
             last_screenshot = screenshot_bytes
             last_change_time = time.time()
-        return last_screenshot, last_change_time - display_start
+    return last_screenshot, last_change_time - display_start
 
 def test_main(page_session, solara_test):
 
