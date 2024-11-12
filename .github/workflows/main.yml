@@ -23,5 +23,5 @@ jobs:
         run: python convert.py imviz-profile.ipynb imviz-profile.py
         working-directory: ./automated
       - name: Run profiling script
-        run: pytest imviz-profile.py
+        run: pytest imviz-profile.py -vs
         working-directory: ./automated
