@@ -5,10 +5,15 @@ import os
 import click
 import nbformat
 
-__all__ = ["report"]
+__all__ = ["report", "report_group"]
 
 
-@click.command()
+@click.group()
+def report_group():
+    pass
+
+
+@report_group.command()
 @click.option(
     "--notebook",
     default=None,

@@ -27,8 +27,7 @@ requires = ["setuptools",
 build-backend = 'setuptools.build_meta'
 
 [project.scripts]
-jupyter-output-monitor = "jupyter_output_monitor:monitor"
-jupyter-output-monitor-report = "jupyter_output_monitor:report"
+jupyter-output-monitor = "jupyter_output_monitor:main"
 
 [tool.setuptools]
 zip-safe = false

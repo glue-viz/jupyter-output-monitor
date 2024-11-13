@@ -25,7 +25,7 @@ The R and G values should be kept as (143, 56), and the B color should be unique
 
 Then, to run the notebook and monitor the changes in widget output, run:
 
-    jupyter-output-monitor --notebook mynotebook.ipynb
+    jupyter-output-monitor monitor --notebook mynotebook.ipynb
 
 Where ``mynotebook.ipynb`` is the name of your notebook. By default, this will
 open a window showing you what is happening, but you can also pass ``--headless``
@@ -36,7 +36,7 @@ to run in headless mode.
 If you want to test this on an existing Jupyter Lab instance, including
 remote ones, you can use ``--url`` instead of ``--notebook``:
 
-    jupyter-output-monitor http://localhost:8987/lab/tree/notebook.ipynb?token=7bb9a...
+    jupyter-output-monitor monitor --url http://localhost:8987/lab/tree/notebook.ipynb?token=7bb9a...
 
 Note that the URL should include the path to the notebook, and will likely
 require the token too.
@@ -124,8 +124,13 @@ after the previous one. This is 10s by default but can be customized with
 cell that takes the longest to fully execute will be expected to take less than
 this time.
 
-### Notebook copy
+## Generating a report
 
-To save a copy of the notebook with the profiling results and
-screenshots inserted after the executed code cells,
-include ``--notebook-copy /path/to/notebook.ipynb``.
+You can generate a copy of the input notebook with output screenshots and profiling
+results inserted by using e.g.:
+
+    jupyter-output-monitor report --notebook mynotebook.ipynb --results-dir=output
+
+Where ``--results-dir`` is the output directory generated with the ``monitor``
+command. BY default, this will write a ``report.ipynb`` notebook, but you can
+overwrite the filename with ``--output-report-name``.

@@ -15,6 +15,8 @@ from playwright.sync_api import sync_playwright
 from ._server import jupyter_server
 from ._utils import clear_notebook, isotime
 
+__all__ = ["monitor", "monitor_group"]
+
 RG_SPECIAL = (143, 56)
 
 
@@ -22,7 +24,12 @@ def iso_to_path(time):
     return time.replace(":", "-")
 
 
-@click.command()
+@click.group()
+def monitor_group():
+    pass
+
+
+@monitor_group.command()
 @click.option(
     "--notebook",
     default=None,

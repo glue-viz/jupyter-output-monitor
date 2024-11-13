@@ -13,6 +13,7 @@ def test_simple(tmp_path):
             sys.executable,
             "-m",
             "jupyter_output_monitor",
+            "monitor",
             "--notebook",
             str(DATA / "simple.ipynb"),
             "--output",
@@ -40,3 +41,19 @@ def test_simple(tmp_path):
     with open(output_path / "event_log.csv") as f:
         reader = csv.reader(f, delimiter=",")
         assert len(list(reader)) == 10
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "jupyter_output_monitor",
+            "report",
+            "--notebook",
+            str(DATA / "simple.ipynb"),
+            "--results-dir",
+            str(output_path),
+        ],
+        check=True,
+    )
+
+    assert (output_path / "report.ipynb").exists()
