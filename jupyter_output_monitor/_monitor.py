@@ -124,9 +124,12 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
             timestamp = isotime()
 
+            # Colons are invalid in filenames on Windows
+            filename_timestamp = timestamp.replace(":", "-")
+
             screenshot_filename = os.path.join(
                 output,
-                f"input-{input_index:03d}-{timestamp}.png",
+                f"input-{input_index:03d}-{filename_timestamp}.png",
             )
             image = Image.open(BytesIO(screenshot_bytes))
             image.save(screenshot_filename)
@@ -188,9 +191,13 @@ def _monitor_output(url, output, wait_after_execute, headless):
                         print(" -> change detected!")
 
                         timestamp = isotime()
+
+                        # Colons are invalid in filenames on Windows
+                        filename_timestamp = timestamp.replace(":", "-")
+
                         screenshot_filename = os.path.join(
                             output,
-                            f"output-{output_index:03d}-{timestamp}.png",
+                            f"output-{output_index:03d}-{filename_timestamp}.png",
                         )
                         image = Image.open(BytesIO(screenshot_bytes))
                         image.save(screenshot_filename)
