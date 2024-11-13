@@ -15,10 +15,21 @@ from playwright.sync_api import sync_playwright
 from ._server import jupyter_server
 from ._utils import clear_notebook, isotime
 
+__all__ = ["monitor", "monitor_group"]
+
 RG_SPECIAL = (143, 56)
 
 
-@click.command()
+def iso_to_path(time):
+    return time.replace(":", "-")
+
+
+@click.group()
+def monitor_group():
+    pass
+
+
+@monitor_group.command()
 @click.option(
     "--notebook",
     default=None,
@@ -42,7 +53,7 @@ RG_SPECIAL = (143, 56)
 @click.option("--headless", is_flag=True, help="Whether to run in headless mode")
 def monitor(notebook, url, output, wait_after_execute, headless):
     if output is None:
-        output = f"output-{isotime()}"
+        output = f"output-{iso_to_path(isotime())}"
 
     if os.path.exists(output):
         print(f"Output directory {output} already exists")
@@ -124,12 +135,9 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
             timestamp = isotime()
 
-            # Colons are invalid in filenames on Windows
-            filename_timestamp = timestamp.replace(":", "-")
-
             screenshot_filename = os.path.join(
                 output,
-                f"input-{input_index:03d}-{filename_timestamp}.png",
+                f"input-{input_index:03d}-{iso_to_path(timestamp)}.png",
             )
             image = Image.open(BytesIO(screenshot_bytes))
             image.save(screenshot_filename)
@@ -192,12 +200,9 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
                         timestamp = isotime()
 
-                        # Colons are invalid in filenames on Windows
-                        filename_timestamp = timestamp.replace(":", "-")
-
                         screenshot_filename = os.path.join(
                             output,
-                            f"output-{output_index:03d}-{filename_timestamp}.png",
+                            f"output-{output_index:03d}-{iso_to_path(timestamp)}.png",
                         )
                         image = Image.open(BytesIO(screenshot_bytes))
                         image.save(screenshot_filename)
