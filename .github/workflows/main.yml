@@ -7,17 +7,18 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    name: jupyter-output-monitor
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-      - name: Set up dependencies
-        run: pip install .
-      - name: Initialize playwright
-        run: playwright install
-      - name: Run monitoring command
-        run: jupyter-output-monitor --notebook automated/imviz-profile.ipynb --headless
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      envs: |
+        - linux: py310-test
+        - linux: py311-test
+        - linux: py312-test
+        - linux: py313-test
+        - macos: py310-test
+        - macos: py311-test
+        - macos: py312-test
+        - macos: py313-test
+        - windows: py310-test
+        - windows: py311-test
+        - windows: py312-test
+        - windows: py313-test
