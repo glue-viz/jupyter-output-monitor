@@ -38,8 +38,17 @@ find = {namespaces = false}
 write_to = "jupyter_output_monitor/_version.py"
 
 [tool.ruff]
-lint.select = [
-  "B",  # flake8-bugbear
-  "I",  # isort
-  "UP",  # pyupgrade
+lint.select = ["ALL"]
+lint.ignore = [
+    "A00",
+    "ANN",
+    "T201",
+    "PTH",
+    "D100",
+    "D103",
+    "D104",
+    "C901",
+    "PLR0915",
+    "DTZ",
+    "E501"
 ]
