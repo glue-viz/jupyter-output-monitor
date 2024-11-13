@@ -1,28 +1,53 @@
 This repository contains an experimental utility to monitor the visual output of
 cells from Jupyter notebooks.
 
-## Requirements
-
-On the machine being used to run the ``monitor_cells.py``:
-
-* [numpy](https://numpy.org)
-* [click](https://click.palletsprojects.com/en/stable/)
-* [pillow](https://python-pillow.org/)
-* [playwright](https://pypi.org/project/playwright/)
-
-On the Jupyter Lab server, optionally (but recommended):
-
-* [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration)
-
-If this is the first time using playwright, you will need to run::
-
-    playwright install firefox
-
 ## Installing
 
 To install, check out this repository and:
 
     pip install -e .
+
+Python 3.10 or later is supported (Python 3.12 or later on Windows).
+
+If this is the first time using playwright, you will also need to run:
+
+    playwright install firefox
+
+## Quick start
+
+First, write one or more blocks of code you want to benchmark each in a cell. In
+addition, as early as possible in the notebook, make sure you set the border
+color on any ipywidget layout you want to record:
+
+    widget.layout.border = '1px solid rgb(143, 56, 3)'
+
+The R and G values should be kept as (143, 56), and the B color should be unique for each widget and be a value between 0 and 255 (inclusive).
+
+Then, to run the notebook and monitor the changes in widget output, run:
+
+    jupyter-output-monitor --notebook mynotebook.ipynb
+
+Where ``mynotebook.ipynb`` is the name of your notebook. By default, this will
+open a window showing you what is happening, but you can also pass ``--headless``
+to run in headless mode.
+
+## Using this on a remote Jupyter Lab instance
+
+If you want to test this on an existing Jupyter Lab instance, including
+remote ones, you can use ``--url`` instead of ``--notebook``:
+
+    jupyter-output-monitor http://localhost:8987/lab/tree/notebook.ipynb?token=7bb9a...
+
+Note that the URL should include the path to the notebook, and will likely
+require the token too.
+
+You should make sure that all output cells in the notebook have been cleared
+before running the above command, and that the widget border color has been
+set as mention in the **Quick start** guide above.
+
+If you make use of the [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration) plugin on the Jupyter Lab server, you will be able to
+more easily e.g. clear the output between runs and edit the notebook in
+between runs of ``jupyter-output-monitor``.
 
 ## How this works
 
@@ -83,45 +108,7 @@ and if using jdaviz:
 To stop recording output for a given cell, you can set the border attribute to
 ``''``.
 
-## Headless vs non-headless mode
-
-By default, the script will open up a window and show what it is doing. It will
-also wait until it detects any input cells before proceeding. This then gives
-you the opportunity to enter any required passwords, and open the correct
-notebook. However, note that if Jupyter Lab opens up with a different notebook
-to the one you want by default, it will start executing that one! It's also
-better if the notebook starts off with output cells cleared, otherwise the script
-may start taking screenshots straight away.
-
-The easiest way to ensure that the correct notebook gets executed and that it
-has had its output cells cleared is to make use of the
-[jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration)
-plugin. With this plugin installed, you can open Jupyter Lab in a regular browser window,
-and set it up so that the correct notebook is open by default and has its cells cleared,
-and you can then launch the monitoring script. In fact, if you do this you can then
-also run the script in headless mode since you know it should be doing the right thing.
-
-One final note is that to avoid any jumping up and down of the notebook during
-execution, the window opened by the script has a very large height so that the
-full notebook fits inside the window without scrolling.
-
-## How to use
-
-* Assuming you have installed
-  [jupyter-collaboration](https://github.com/jupyterlab/jupyter-collaboration),
-  start up Jupyter Lab instance on a regular browser and go to the notebook you
-  want to profile.
-* If not already done, write one or more blocks of code you want to benchmark
-  each in a cell. In addition, as early as possible in the notebook, make sure
-  you set the border color on any ipywidget layout you want to record.
-* Make sure the notebook you want to profile is the main one opened and that
-  you have cleared any output cells.
-* Run the main command in this package, specifying the URL to connect to for Jupyter Lab, e.g.:
-
-      jupyter-output-monitor http://localhost:8987
-
 ## Settings
-
 
 ### Headless
 

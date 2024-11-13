@@ -11,7 +11,8 @@ dependencies = [
     "numpy>=1.23",
     "click",
     "pillow",
-    "playwright"
+    "playwright",
+    "solara[pytest]"
 ]
 dynamic = ["version"]
 
@@ -38,8 +39,29 @@ find = {namespaces = false}
 write_to = "jupyter_output_monitor/_version.py"
 
 [tool.ruff]
-lint.select = [
-  "B",  # flake8-bugbear
-  "I",  # isort
-  "UP",  # pyupgrade
+lint.select = ["ALL"]
+lint.ignore = [
+    "A00",
+    "ANN",
+    "T201",
+    "PTH",
+    "D100",
+    "D103",
+    "D104",
+    "C901",
+    "PLR0915",
+    "PLR2004",
+    "DTZ",
+    "E501",
+    "RET",
+    "INP",
+    "S101",
+    "SIM108",
+    "S603"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "ipywidgets"
 ]

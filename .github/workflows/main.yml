@@ -1,0 +1,22 @@
+name: Automated test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  test:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      envs: |
+        - linux: py310-test
+        - linux: py311-test
+        - linux: py312-test
+        - linux: py313-test
+        - macos: py310-test
+        - macos: py311-test
+        - macos: py312-test
+        - macos: py313-test
+        - windows: py312-test
+        - windows: py313-test
