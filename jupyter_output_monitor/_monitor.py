@@ -45,7 +45,7 @@ def monitor(notebook, url, output, wait_after_execute, headless):
         output = f"output-{isotime()}"
 
     if os.path.exists(output):
-        print("Output directory {output} already exists")
+        print(f"Output directory {output} already exists")
         sys.exit(1)
 
     os.makedirs(output)
@@ -150,14 +150,11 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
                     # The element we are interested in is one level down
 
-                    div = output_cell.query_selector("div")
-
-                    if div is None:
-                        continue
-
-                    style = div.get_attribute("style")
-
-                    if style is None or "border-color: rgb(" not in style:
+                    for child in output_cell.query_selector_all("*"):
+                        style = child.get_attribute("style")
+                        if style is not None and "border-color: rgb(" in style:
+                            break
+                    else:
                         continue
 
                     # Parse rgb values for border
@@ -180,7 +177,7 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
                     print(f"- taking screenshot of output cell {output_index}")
 
-                    screenshot_bytes = div.screenshot()
+                    screenshot_bytes = child.screenshot()
 
                     # If screenshot didn't exist before for this cell or if it has
                     # changed, we save it to a file and keep track of it.

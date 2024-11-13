@@ -1,17 +1,24 @@
+# Experimental command to convert a notebook to a script that tests widget
+# output with solara but without launching a Jupyter Lab instance. Not yet
+# exposed via the public API.
+
 import os
-import click
-import nbformat
 from textwrap import indent
 
+import click
+import nbformat
+
+
 def remove_magics(source):
-    lines = [line for line in source.splitlines() if not line.startswith('%')]
+    lines = [line for line in source.splitlines() if not line.startswith("%")]
     return os.linesep.join(lines)
 
 
 def remove_excludes(source):
-    lines = [line for line in source.splitlines() if not line.strip().endswith('# EXCLUDE')]
+    lines = [
+        line for line in source.splitlines() if not line.strip().endswith("# EXCLUDE")
+    ]
     return os.linesep.join(lines)
-
 
 
 HEADER = """
@@ -50,52 +57,51 @@ print(f"Extra time waiting for display to update: {time_elapsed:.2f}s")
 
 
 @click.command()
-@click.argument('input_notebook')
-@click.argument('output_script')
+@click.argument("input_notebook")
+@click.argument("output_script")
 def convert(input_notebook, output_script):
-
     nb = nbformat.read(input_notebook, as_version=4)
 
-    with open(output_script, 'w') as f:
-
+    with open(output_script, "w") as f:
         f.write(HEADER)
 
         captured = False
 
-        for icell, cell in enumerate(nb['cells']):
-
-            if cell.cell_type == 'markdown':
-                f.write(indent(cell.source, '    # ') + '\n\n')
-            elif cell.cell_type == 'code':
-
-                if cell.source.strip() == '':
+        for icell, cell in enumerate(nb["cells"]):
+            if cell.cell_type == "markdown":
+                f.write(indent(cell.source, "    # ") + "\n\n")
+            elif cell.cell_type == "code":
+                if cell.source.strip() == "":
                     continue
 
                 lines = cell.source.splitlines()
 
                 new_lines = []
 
-                new_lines.append('cell_start = time.time()\n\n')
+                new_lines.append("cell_start = time.time()\n\n")
 
                 for line in lines:
-                    if line.startswith('%') or line.strip().endswith('# EXCLUDE'):
+                    if line.startswith("%") or line.strip().endswith("# EXCLUDE"):
                         continue
-                    elif line.endswith('# SCREENSHOT'):
-                        new_lines.append('object_to_capture = ' + line)
+                    elif line.endswith("# SCREENSHOT"):
+                        new_lines.append("object_to_capture = " + line)
                         new_lines.extend(DISPLAY_CODE.splitlines())
                         captured = True
                     else:
                         new_lines.append(line)
 
-                new_lines.append('cell_end = time.time()\n')
-                new_lines.append(f'print(f"Cell {icell:2d} Python code executed in           {{cell_end - cell_start:.2f}}s")')
+                new_lines.append("cell_end = time.time()\n")
+                new_lines.append(
+                    f'print(f"Cell {icell:2d} Python code executed in           {{cell_end - cell_start:.2f}}s")',
+                )
 
                 if captured:
                     new_lines.extend(PROFILING_CODE.splitlines())
 
                 source = os.linesep.join(new_lines)
 
-                f.write(indent(source, "    ") + '\n\n')
+                f.write(indent(source, "    ") + "\n\n")
+
 
 if __name__ == "__main__":
     convert()

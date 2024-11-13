@@ -50,6 +50,18 @@ lint.ignore = [
     "D104",
     "C901",
     "PLR0915",
+    "PLR2004",
     "DTZ",
-    "E501"
+    "E501",
+    "RET",
+    "INP",
+    "S101",
+    "SIM108",
+    "S603"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "ipywidgets"
 ]
