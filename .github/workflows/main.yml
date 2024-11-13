@@ -6,7 +6,7 @@ on:
   push:
 
 jobs:
-  test:
+  test_convert:
     runs-on: ubuntu-latest
     name: Python 3.12
     steps:
@@ -19,6 +19,27 @@ jobs:
         run: pip install playwright pytest-playwright solara[pytest] nbformat click pytest scipy astropy jdaviz
       - name: Initialize playwright
         run: playwright install
+      - name: Convert notebook to profiling script
+        run: python convert.py imviz-profile.ipynb imviz-profile.py
+        working-directory: ./automated
+      - name: Run profiling script
+        run: pytest imviz-profile.py -vs
+        working-directory: ./automated
+  test_main:
+    runs-on: ubuntu-latest
+    name: Python 3.12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Set up dependencies
+        run: pip install .
+      - name: Initialize playwright
+        run: playwright install
+      - name: Run monitoring command
+        run: jupyter-output-monitor --notebook automated/imviz-profile.ipynb --headless
       - name: Convert notebook to profiling script
         run: python convert.py imviz-profile.ipynb imviz-profile.py
         working-directory: ./automated
