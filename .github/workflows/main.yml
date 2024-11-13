@@ -18,7 +18,5 @@ jobs:
         - macos: py311-test
         - macos: py312-test
         - macos: py313-test
-        - windows: py310-test
-        - windows: py311-test
         - windows: py312-test
         - windows: py313-test
