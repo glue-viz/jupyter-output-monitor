@@ -7,7 +7,9 @@ To install, check out this repository and:
 
     pip install -e .
 
-If this is the first time using playwright, you will also need to run::
+Python 3.10 or later is supported (Python 3.12 or later on Windows).
+
+If this is the first time using playwright, you will also need to run:
 
     playwright install firefox
 
