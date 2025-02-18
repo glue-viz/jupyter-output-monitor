@@ -91,7 +91,7 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
         # Launch browser and open URL
 
-        browser = p.firefox.launch(headless=headless)
+        browser = p.chromium.launch(headless=headless)
         page = browser.new_page(viewport={"width": 2000, "height": 10000})
         page.goto(url)
 
