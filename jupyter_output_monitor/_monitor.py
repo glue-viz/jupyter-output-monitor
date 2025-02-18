@@ -114,6 +114,30 @@ def _monitor_output(url, output, wait_after_execute, headless):
 
         print(f"{len(input_cells)} input cells found")
 
+        # Take screenshot of the whole page, for the record
+        screenshot_bytes = page.screenshot()
+
+        timestamp = isotime()
+
+        screenshot_filename = os.path.join(
+            output,
+            f"page-{iso_to_path(timestamp)}.png",
+        )
+        image = Image.open(BytesIO(screenshot_bytes))
+        image.save(screenshot_filename)
+
+        # Check if server is asking us to select a kernel
+        dialogs = list(page.query_selector_all(".jp-Dialog-header"))
+        for dialog in dialogs:
+            if 'Select Kernel' in dialog.inner_text():
+                print("Server is asking to select a kernel, accepting default")
+                accept = list(page.query_selector_all(".jp-mod-accept"))
+                if len(accept) == 1:
+                    accept[0].click()
+                else:
+                    print("Error: multiple accept buttons found, not sure which to click")
+                    sys.exit(1)
+
         last_screenshot = {}
 
         # Now loop over each input cell and execute
