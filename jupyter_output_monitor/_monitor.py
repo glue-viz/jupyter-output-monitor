@@ -129,13 +129,15 @@ def _monitor_output(url, output, wait_after_execute, headless):
         # Check if server is asking us to select a kernel
         dialogs = list(page.query_selector_all(".jp-Dialog-header"))
         for dialog in dialogs:
-            if 'Select Kernel' in dialog.inner_text():
+            if "Select Kernel" in dialog.inner_text():
                 print("Server is asking to select a kernel, accepting default")
                 accept = list(page.query_selector_all(".jp-mod-accept"))
                 if len(accept) == 1:
                     accept[0].click()
                 else:
-                    print("Error: multiple accept buttons found, not sure which to click")
+                    print(
+                        "Error: multiple accept buttons found, not sure which to click"
+                    )
                     sys.exit(1)
 
         last_screenshot = {}
