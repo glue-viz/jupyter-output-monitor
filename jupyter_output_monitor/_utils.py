@@ -4,7 +4,7 @@ import socket
 from nbconvert import NotebookExporter
 from traitlets.config import Config
 
-__all__ = ["get_free_port", "clear_notebook", "isotime"]
+__all__ = ["clear_notebook", "get_free_port", "isotime"]
 
 
 def get_free_port():
