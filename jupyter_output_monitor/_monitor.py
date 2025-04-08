@@ -13,7 +13,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 from ._server import jupyter_server
-from ._utils import clear_notebook, isotime
+from ._utils import clear_notebook, isotime, max_uint8_difference
 
 __all__ = ["monitor", "monitor_group"]
 
@@ -50,8 +50,16 @@ def monitor_group():
     default=10,
     help="Time in s to wait after executing each cell",
 )
+@click.option(
+    "--atol",
+    default=0,
+    help=(
+        "If an output image for a cell exists, a new image will only be written "
+        "out if the maximum uint8 difference between the two exceeds atol"
+    ),
+)
 @click.option("--headless", is_flag=True, help="Whether to run in headless mode")
-def monitor(notebook, url, output, wait_after_execute, headless):
+def monitor(notebook, url, output, wait_after_execute, atol, headless):
     if output is None:
         output = f"output-{iso_to_path(isotime())}"
 
@@ -73,12 +81,12 @@ def monitor(notebook, url, output, wait_after_execute, headless):
         clear_notebook(notebook, os.path.join(notebook_dir, "notebook.ipynb"))
         with jupyter_server(notebook_dir) as server:
             url = server.base_url + "/lab/tree/notebook.ipynb"
-            _monitor_output(url, output, wait_after_execute, headless)
+            _monitor_output(url, output, wait_after_execute, atol, headless)
     else:
-        _monitor_output(url, output, wait_after_execute, headless)
+        _monitor_output(url, output, wait_after_execute, atol, headless)
 
 
-def _monitor_output(url, output, wait_after_execute, headless):
+def _monitor_output(url, output, wait_after_execute, atol, headless):
     # Index of the current last screenshot, by output index
     last_screenshot = {}
 
@@ -129,13 +137,15 @@ def _monitor_output(url, output, wait_after_execute, headless):
         # Check if server is asking us to select a kernel
         dialogs = list(page.query_selector_all(".jp-Dialog-header"))
         for dialog in dialogs:
-            if 'Select Kernel' in dialog.inner_text():
+            if "Select Kernel" in dialog.inner_text():
                 print("Server is asking to select a kernel, accepting default")
                 accept = list(page.query_selector_all(".jp-mod-accept"))
                 if len(accept) == 1:
                     accept[0].click()
                 else:
-                    print("Error: multiple accept buttons found, not sure which to click")
+                    print(
+                        "Error: multiple accept buttons found, not sure which to click",
+                    )
                     sys.exit(1)
 
         last_screenshot = {}
@@ -222,25 +232,43 @@ def _monitor_output(url, output, wait_after_execute, headless):
                     ):
                         print(" -> change detected!")
 
-                        timestamp = isotime()
+                        if output_index in last_screenshot:
+                            max_diff = max_uint8_difference(
+                                last_screenshot[output_index],
+                                screenshot_bytes,
+                            )
+                        else:
+                            max_diff = 256
 
-                        screenshot_filename = os.path.join(
-                            output,
-                            f"output-{output_index:03d}-{iso_to_path(timestamp)}.png",
-                        )
-                        image = Image.open(BytesIO(screenshot_bytes))
-                        image.save(screenshot_filename)
+                        if max_diff >= atol:
+                            print(
+                                f" -> maximum difference ({max_diff}) exceeds atol ({atol}), writing out image",
+                            )
 
-                        log.write(
-                            f"{timestamp},output-changed,{output_index},{screenshot_filename}\n",
-                        )
-                        log.flush()
+                            timestamp = isotime()
 
-                        print(
-                            f"Saving screenshot of output {output_index} at {timestamp}",
-                        )
+                            screenshot_filename = os.path.join(
+                                output,
+                                f"output-{output_index:03d}-{iso_to_path(timestamp)}.png",
+                            )
+                            image = Image.open(BytesIO(screenshot_bytes))
+                            image.save(screenshot_filename)
 
-                        last_screenshot[output_index] = screenshot_bytes
+                            log.write(
+                                f"{timestamp},output-changed,{output_index},{screenshot_filename}\n",
+                            )
+                            log.flush()
+
+                            print(
+                                f"Saving screenshot of output {output_index} at {timestamp}",
+                            )
+
+                            last_screenshot[output_index] = screenshot_bytes
+
+                        else:
+                            print(
+                                f" -> maximum difference ({max_diff}) not does exceed atol ({atol}), skipping",
+                            )
 
             print("Stopping monitoring output and moving on to next input cell")
 
