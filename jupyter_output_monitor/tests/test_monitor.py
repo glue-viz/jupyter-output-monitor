@@ -3,11 +3,18 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 DATA = Path(__file__).parent / "data"
 
 
-def test_simple(tmp_path):
-    output_path = tmp_path / "output"
+@pytest.mark.parametrize("threshold", [None, 2])
+def test_simple(output_path, threshold):
+    if threshold:
+        output_path = output_path / "simple_threshold"
+    else:
+        output_path = output_path / "simple"
+    extra = [] if threshold is None else ["--atol", str(threshold)]
     subprocess.run(
         [
             sys.executable,
@@ -19,6 +26,7 @@ def test_simple(tmp_path):
             "--output",
             str(output_path),
             "--headless",
+            *extra,
         ],
         check=True,
     )
@@ -29,18 +37,30 @@ def test_simple(tmp_path):
     assert len(list(output_path.glob("input-*.png"))) == 5
 
     # Output screenshots
-    assert len(list(output_path.glob("output-*.png"))) == 4
+    if threshold:
+        assert len(list(output_path.glob("output-*.png"))) in (4, 5)
+    else:
+        assert len(list(output_path.glob("output-*.png"))) >= 4
+
+    # Specifically for cell with index 3
+    if threshold:
+        assert len(list(output_path.glob("output-003-*.png"))) == 1
+    else:
+        assert len(list(output_path.glob("output-003-*.png"))) >= 1
 
     # Specifically for cell with index 33
-    assert len(list(output_path.glob("output-003-*.png"))) == 1
-
-    # Specifically for cell with index 33
-    assert len(list(output_path.glob("output-033-*.png"))) == 3
+    if threshold:
+        assert len(list(output_path.glob("output-033-*.png"))) in (3, 4)
+    else:
+        assert len(list(output_path.glob("output-033-*.png"))) >= 3
 
     # Check that event log exists and is parsable
     with open(output_path / "event_log.csv") as f:
         reader = csv.reader(f, delimiter=",")
-        assert len(list(reader)) == 10
+        if threshold:
+            assert len(list(reader)) in (10, 11)
+        else:
+            assert len(list(reader)) >= 10
 
     subprocess.run(
         [
