@@ -136,7 +136,7 @@ def _monitor_output(url, output, wait_after_execute, headless):
                     accept[0].click()
                 else:
                     print(
-                        "Error: multiple accept buttons found, not sure which to click"
+                        "Error: multiple accept buttons found, not sure which to click",
                     )
                     sys.exit(1)
 
