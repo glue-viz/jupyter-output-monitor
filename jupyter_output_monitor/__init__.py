@@ -3,4 +3,4 @@ from ._monitor import monitor
 from ._report import report
 from ._version import __version__
 
-__all__ = ["monitor", "report", "__version__", "main"]
+__all__ = ["__version__", "main", "monitor", "report"]
